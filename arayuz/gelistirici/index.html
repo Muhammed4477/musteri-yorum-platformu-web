@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geliştirici - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Minimal Header -->
+<header style="position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(15,23,42,.9);backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(255,255,255,.06);padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;">
+  <a href="/" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;
+    font-size:1.15rem;color:#fff;text-decoration:none;letter-spacing:-.02em;">
+    <i class="bi bi-chat-square-text-fill" style="background:linear-gradient(135deg,#6366f1,#8b5cf6,#06b6d4);
+      -webkit-background-clip:text;background-clip:text;color:transparent;margin-right:6px;"></i>
+    MüşteriYorum
+  </a>
+  <a id="dev-back-btn" href="/" class="btn btn-outline-light btn-sm">
+    <i class="bi bi-arrow-left"></i> Geri Dön
+  </a>
+</header>
+
+<!-- Dev Hero -->
+<section class="dev-hero">
+  <div class="container text-center">
+    <span class="badge mb-3" style="background:rgba(255,255,255,.12);color:#fff;padding:8px 16px;letter-spacing:.08em">
+      <i class="bi bi-code-slash"></i> GELİŞTİRİCİ
+    </span>
+    <h1 class="fw-bold mb-2" style="font-size:2.6rem">Bu projeyi geliştiren kişi</h1>
+    <p class="lead opacity-75 mb-0">İnternet Programcılığı dersi kapsamında tasarlandı, geliştirildi ve sunuldu.</p>
+  </div>
+</section>
+
+<!-- Developer Profile Card -->
+<div class="container">
+  <div class="dev-card fade-in">
+    <div class="dev-card-banner"></div>
+    <div class="dev-avatar">MÇ</div>
+    <div class="dev-body">
+      <h2 class="dev-name">Muhammed Çelik</h2>
+      <div class="dev-title">
+        <i class="bi bi-mortarboard-fill"></i> Bilgisayar Mühendisi · 3. Sınıf Öğrencisi
+      </div>
+
+      <p class="dev-bio">
+        Modern web teknolojileri, yapay zekâ destekli uygulamalar ve şık kullanıcı arayüzleri üzerine çalışan
+        bir yazılım geliştiricisi. <strong>MüşteriYorum</strong> platformunu uçtan uca tasarladı ve geliştirdi.
+      </p>
+
+      <div class="dev-info-grid">
+        <a href="tel:+905522068674" class="dev-info">
+          <div class="dev-info-icon"><i class="bi bi-telephone-fill"></i></div>
+          <div>
+            <span class="dev-info-label">Telefon</span>
+            <span class="dev-info-value">0 552 206 86 74</span>
+          </div>
+        </a>
+
+        <a href="mailto:c.muhammed4477@gmail.com" class="dev-info">
+          <div class="dev-info-icon"><i class="bi bi-envelope-fill"></i></div>
+          <div>
+            <span class="dev-info-label">E-posta</span>
+            <span class="dev-info-value">c.muhammed4477@gmail.com</span>
+          </div>
+        </a>
+
+        <a href="https://github.com/Muhammed4477" target="_blank" rel="noopener" class="dev-info">
+          <div class="dev-info-icon"><i class="bi bi-github"></i></div>
+          <div>
+            <span class="dev-info-label">GitHub</span>
+            <span class="dev-info-value">github.com/Muhammed4477</span>
+          </div>
+        </a>
+
+        <div class="dev-info" style="cursor:default">
+          <div class="dev-info-icon"><i class="bi bi-briefcase-fill"></i></div>
+          <div>
+            <span class="dev-info-label">Marka</span>
+            <span class="dev-info-value">ClkSoft</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="dev-tags">
+        <span class="dev-tag brand">Node.js</span>
+        <span class="dev-tag brand">Express</span>
+        <span class="dev-tag success">PostgreSQL</span>
+        <span class="dev-tag warn">JWT Auth</span>
+        <span class="dev-tag">JavaScript</span>
+        <span class="dev-tag">Bootstrap 5</span>
+        <span class="dev-tag">Chart.js</span>
+        <span class="dev-tag brand">AI / NLP</span>
+      </div>
+
+      <div class="d-flex justify-content-center gap-2 flex-wrap mt-4">
+        <a href="https://github.com/Muhammed4477" target="_blank" rel="noopener" class="btn btn-primary">
+          <i class="bi bi-github"></i> GitHub Profilim
+        </a>
+        <a href="mailto:c.muhammed4477@gmail.com" class="btn btn-outline-primary">
+          <i class="bi bi-envelope"></i> İletişime Geç
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Proje Künyesi -->
+  <div class="row g-4 mb-5 justify-content-center">
+    <div class="col-md-10 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-3"><i class="bi bi-bookmark-star-fill text-warning"></i> Proje Künyesi</h5>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <small class="text-muted d-block">Proje Adı</small>
+              <strong>MüşteriYorum — YZ ile Yorum Yönetimi</strong>
+            </div>
+            <div class="col-sm-6">
+              <small class="text-muted d-block">Ders</small>
+              <strong>İnternet Programcılığı</strong>
+            </div>
+            <div class="col-sm-6">
+              <small class="text-muted d-block">Bölüm</small>
+              <strong>Bilgisayar Mühendisliği</strong>
+            </div>
+            <div class="col-sm-6">
+              <small class="text-muted d-block">Yıl</small>
+              <strong>2025 - 2026</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/altbilgi.js" defer></script>
+<script>
+  // Oturum açıksa "Geri Dön" panele yönlendirsin
+  const _u = getUser();
+  if (_u) {
+    const btn = document.getElementById('dev-back-btn');
+    btn.href = rolHomePage(_u.rol);
+    btn.innerHTML = '<i class="bi bi-arrow-left"></i> Panele Dön';
+  }
+</script>
+</body>
+</html>

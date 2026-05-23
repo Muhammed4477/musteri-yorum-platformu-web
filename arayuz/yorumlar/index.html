@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yorumlar - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <a href="/panel/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/yorumlar/" class="nav-link active"><i class="bi bi-chat-left-text"></i> Yorumlar</a>
+    <a href="/yorumlar/yukleme.html" class="nav-link"><i class="bi bi-upload"></i> Toplu Yükle</a>
+    <a href="/analiz/" class="nav-link"><i class="bi bi-graph-up"></i> Analiz</a>
+    <a href="/raporlar/" class="nav-link"><i class="bi bi-file-earmark-bar-graph"></i> Raporlar</a>
+    <a href="/profil/" class="nav-link"><i class="bi bi-person-circle"></i> Profilim</a>
+    <a href="/yonetici/" class="nav-link" id="sidebar-admin-link" style="display:none"><i class="bi bi-shield-check"></i> Admin</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0">Yorumlar</h4>
+    <div class="d-flex gap-2">
+      <a href="/yorumlar/yukleme.html" class="btn btn-outline-secondary btn-sm"><i class="bi bi-upload"></i> Toplu Yükle</a>
+      <a id="reviews-add-btn" href="/yorumlar/ekle.html" class="btn btn-primary btn-sm" style="display:none"></a>
+    </div>
+  </div>
+
+  <!-- Filtreler -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-2">
+        <div class="col-md-4">
+          <input type="text" class="form-control" id="filter-arama" placeholder="Yorum veya müşteri ara...">
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" id="filter-kategori">
+            <option value="">Tüm Kategoriler</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" id="filter-puan">
+            <option value="">Tüm Puanlar</option>
+            <option value="5">★★★★★ (5)</option>
+            <option value="4">★★★★☆ (4)</option>
+            <option value="3">★★★☆☆ (3)</option>
+            <option value="2">★★☆☆☆ (2)</option>
+            <option value="1">★☆☆☆☆ (1)</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" id="filter-sehir">
+            <option value="">Tüm İller</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <select class="form-select" id="filter-ilce" disabled>
+            <option value="">Tüm İlçeler</option>
+          </select>
+        </div>
+      </div>
+      <div class="row g-2 mt-1">
+        <div class="col-md-2">
+          <input type="date" class="form-control" id="filter-baslangic" placeholder="Başlangıç">
+        </div>
+        <div class="col-md-2">
+          <input type="date" class="form-control" id="filter-bitis" placeholder="Bitiş">
+        </div>
+      </div>
+      <div class="mt-2 d-flex gap-2">
+        <button class="btn btn-primary btn-sm" onclick="loadReviews(1)"><i class="bi bi-search"></i> Filtrele</button>
+        <button class="btn btn-outline-secondary btn-sm" onclick="resetFilters()"><i class="bi bi-x-circle"></i> Temizle</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="alert-container"></div>
+
+  <!-- Tablo -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+      <div id="loading" class="text-center py-5 text-muted">
+        <div class="spinner-border"></div><p class="mt-2">Yükleniyor...</p>
+      </div>
+      <div id="reviews-table" style="display:none">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Tarih</th>
+                <th>Müşteri</th>
+                <th>Yorum</th>
+                <th>Puan</th>
+                <th>Konu</th>
+                <th>Duygu</th>
+                <th>Yanıt</th>
+                <th>İşlem</th>
+              </tr>
+            </thead>
+            <tbody id="reviews-body"></tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between align-items-center p-3 border-top">
+          <span id="pagination-info" class="text-muted small"></span>
+          <nav><ul class="pagination pagination-sm mb-0" id="pagination"></ul></nav>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Yanıt Modal -->
+<div class="modal fade" id="yanitModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-reply-fill text-primary"></i> Yoruma Yanıt Ver</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="yanit-alert"></div>
+        <label class="form-label fw-semibold">Yanıtınız</label>
+        <textarea class="form-control" id="yanit-metin" rows="4" placeholder="Müşteriye yanıtınızı yazın..."></textarea>
+        <div class="form-text">Bu yanıt müşteri sayfasında yorumun altında görünecektir.</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-primary" id="yanit-gonder"><i class="bi bi-send"></i> Yanıtı Kaydet</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Silme Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Yorumu Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">Bu yorumu silmek istediğinizden emin misiniz?</div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button type="button" class="btn btn-danger" id="confirm-delete">Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/il-ilce.js"></script>
+<script>
+requireAuth();
+updateSidebar();
+(function() {
+  const u = getUser();
+  const btn = document.getElementById('reviews-add-btn');
+  if (!btn || !u) return;
+  if (u.rol !== 'user') {
+    btn.innerHTML = '<i class="bi bi-plus-circle"></i> Yorum Ekle';
+    btn.style.display = '';
+  }
+})();
+
+// İl dropdown'ını doldur
+fillIlSelect(document.getElementById('filter-sehir'), 'Tüm İller');
+
+// İl seçilince ilçeleri güncelle
+document.getElementById('filter-sehir').addEventListener('change', function() {
+  const ilceSelect = document.getElementById('filter-ilce');
+  const secilenIl = this.value;
+  if (secilenIl) {
+    fillIlceSelect(ilceSelect, secilenIl, 'Tüm İlçeler');
+    ilceSelect.disabled = false;
+  } else {
+    ilceSelect.innerHTML = '<option value="">Tüm İlçeler</option>';
+    ilceSelect.disabled = true;
+  }
+});
+
+let currentPage = 1;
+let deleteId = null;
+const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+async function loadCategories() {
+  const res = await fetch('/api/categories');
+  const cats = await res.json();
+  const sel = document.getElementById('filter-kategori');
+  cats.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.kategori_adi}</option>`);
+}
+
+async function loadReviews(page = 1) {
+  currentPage = page;
+  document.getElementById('loading').style.display = '';
+  document.getElementById('reviews-table').style.display = 'none';
+
+  const arama = document.getElementById('filter-arama').value;
+  const kategori_id = document.getElementById('filter-kategori').value;
+  const puan = document.getElementById('filter-puan').value;
+  const baslangic = document.getElementById('filter-baslangic').value;
+  const bitis = document.getElementById('filter-bitis').value;
+  const sehir = document.getElementById('filter-sehir').value;
+  const ilce = document.getElementById('filter-ilce').value;
+
+  const params = new URLSearchParams({ sayfa: page, limit: 10 });
+  if (arama) params.append('arama', arama);
+  if (kategori_id) params.append('kategori_id', kategori_id);
+  if (puan) params.append('puan', puan);
+  if (baslangic) params.append('baslangic', baslangic);
+  if (bitis) params.append('bitis', bitis);
+  if (sehir) params.append('sehir', sehir);
+  if (ilce) params.append('ilce', ilce);
+
+  try {
+    const res = await apiFetch('/api/reviews?' + params);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('reviews-table').style.display = '';
+
+    const tbody = document.getElementById('reviews-body');
+    if (!data.yorumlar.length) {
+      tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">Yorum bulunamadı</td></tr>';
+    } else {
+      const currentUser = getUser();
+      const isOwner = currentUser && currentUser.rol === 'user';
+      tbody.innerHTML = data.yorumlar.map(r => `
+        <tr>
+          <td class="small">${formatDate(r.olusturma)}</td>
+          <td>${r.musteri_adi || '<span class="text-muted">Anonim</span>'}</td>
+          <td><span class="d-inline-block text-truncate" style="max-width:180px" title="${r.yorum_metni}">${r.yorum_metni}</span></td>
+          <td>${starsHtml(r.puan)}</td>
+          <td>${r.konu_etiketi ? `<span class="badge bg-light text-dark border">${r.konu_etiketi}</span>` : (r.analiz && r.analiz.konu_etiketi ? `<span class="badge bg-light text-dark border">${r.analiz.konu_etiketi}</span>` : '<span class="text-muted small">-</span>')}</td>
+          <td>${r.analiz ? duyguBadge(r.analiz.duygu) : '<span class="badge bg-secondary">Bekliyor</span>'}</td>
+          <td>
+            ${isOwner
+              ? (r.isletme_yaniti
+                  ? `<span class="badge bg-success-subtle text-success border border-success-subtle" title="${r.isletme_yaniti}"><i class="bi bi-check2"></i> Yanıtlandı</span>`
+                  : `<button class="btn btn-sm btn-outline-primary" onclick="openYanitModal(${r.id})"><i class="bi bi-reply"></i> Yanıtla</button>`)
+              : '<span class="text-muted small">-</span>'}
+          </td>
+          <td>
+            <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${r.id})"><i class="bi bi-trash"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    const toplam = data.toplam;
+    const sonSayfa = Math.ceil(toplam / 10);
+    document.getElementById('pagination-info').textContent = `Toplam ${toplam} yorum, sayfa ${page}/${sonSayfa || 1}`;
+
+    const ul = document.getElementById('pagination');
+    ul.innerHTML = '';
+    for (let i = 1; i <= sonSayfa; i++) {
+      ul.innerHTML += `<li class="page-item ${i===page?'active':''}">
+        <button class="page-link" onclick="loadReviews(${i})">${i}</button></li>`;
+    }
+  } catch(e) {
+    document.getElementById('loading').innerHTML = '<p class="text-danger text-center">Yüklenemedi</p>';
+  }
+}
+
+let yanitReviewId = null;
+const yanitModal = new bootstrap.Modal(document.getElementById('yanitModal'));
+
+function openYanitModal(id) {
+  yanitReviewId = id;
+  document.getElementById('yanit-metin').value = '';
+  document.getElementById('yanit-alert').innerHTML = '';
+  yanitModal.show();
+}
+
+document.getElementById('yanit-gonder').addEventListener('click', async () => {
+  const isletme_yaniti = document.getElementById('yanit-metin').value.trim();
+  if (!isletme_yaniti) {
+    document.getElementById('yanit-alert').innerHTML = '<div class="alert alert-danger py-2">Yanıt metni boş olamaz.</div>';
+    return;
+  }
+  try {
+    const res = await apiFetch(`/api/reviews/${yanitReviewId}/yanit`, {
+      method: 'PUT',
+      body: JSON.stringify({ isletme_yaniti })
+    });
+    if (res && res.ok) {
+      yanitModal.hide();
+      showAlert('Yanıtınız kaydedildi.', 'success');
+      loadReviews(currentPage);
+    } else {
+      const data = await res.json();
+      document.getElementById('yanit-alert').innerHTML = `<div class="alert alert-danger py-2">${data.hata || 'Hata oluştu'}</div>`;
+    }
+  } catch {
+    document.getElementById('yanit-alert').innerHTML = '<div class="alert alert-danger py-2">Bağlantı hatası</div>';
+  }
+});
+
+function confirmDelete(id) {
+  deleteId = id;
+  deleteModal.show();
+}
+
+document.getElementById('confirm-delete').addEventListener('click', async () => {
+  if (!deleteId) return;
+  deleteModal.hide();
+  try {
+    const res = await apiFetch(`/api/reviews/${deleteId}`, { method: 'DELETE' });
+    if (res && res.ok) {
+      showAlert('Yorum silindi', 'success');
+      loadReviews(currentPage);
+    } else {
+      showAlert('Silme işlemi başarısız');
+    }
+  } catch { showAlert('Hata oluştu'); }
+  deleteId = null;
+});
+
+function resetFilters() {
+  ['filter-arama','filter-baslangic','filter-bitis'].forEach(id => document.getElementById(id).value = '');
+  ['filter-kategori','filter-puan','filter-sehir'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  const ilceSelect = document.getElementById('filter-ilce');
+  ilceSelect.innerHTML = '<option value="">Tüm İlçeler</option>';
+  ilceSelect.disabled = true;
+  loadReviews(1);
+}
+
+loadCategories();
+loadReviews(1);
+</script>
+</body>
+</html>

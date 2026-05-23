@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+</head>
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <a href="/panel/" class="nav-link active"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/yorumlar/" class="nav-link"><i class="bi bi-chat-left-text"></i> Yorumlar</a>
+    <a href="/yorumlar/yukleme.html" class="nav-link"><i class="bi bi-upload"></i> Toplu Yükle</a>
+    <a href="/analiz/" class="nav-link"><i class="bi bi-graph-up"></i> Analiz</a>
+    <a href="/raporlar/" class="nav-link"><i class="bi bi-file-earmark-bar-graph"></i> Raporlar</a>
+    <a href="/profil/" class="nav-link"><i class="bi bi-person-circle"></i> Profilim</a>
+    <a href="/yonetici/" class="nav-link" id="sidebar-admin-link" style="display:none"><i class="bi bi-shield-check"></i> Admin</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="fw-bold mb-0">Dashboard</h4>
+      <small class="text-muted">Hoş geldiniz, <span id="sidebar-user"></span></small>
+    </div>
+    <a id="header-action-btn" href="/yorumlar/yukleme.html" class="btn btn-primary" style="display:none"></a>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="stat-card card-toplam">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-label">Toplam Yorum</div>
+            <div class="stat-number" id="stat-toplam">0</div>
+          </div>
+          <div class="stat-icon"><i class="bi bi-chat-text"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card card-olumlu">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-label">Olumlu</div>
+            <div class="stat-number" id="stat-olumlu">0</div>
+          </div>
+          <div class="stat-icon"><i class="bi bi-emoji-smile"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card card-olumsuz">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-label">Olumsuz</div>
+            <div class="stat-number" id="stat-olumsuz">0</div>
+          </div>
+          <div class="stat-icon"><i class="bi bi-emoji-frown"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card card-notr">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="stat-label">Nötr</div>
+            <div class="stat-number" id="stat-notr">0</div>
+          </div>
+          <div class="stat-icon"><i class="bi bi-emoji-neutral"></i></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- YZ Aksiyon Kartları (sadece işletme sahibi için) -->
+  <div id="aksiyon-section" style="display:none" class="mb-4">
+    <div class="d-flex align-items-center mb-3 gap-2">
+      <i class="bi bi-cpu-fill text-primary fs-5"></i>
+      <h6 class="fw-bold mb-0">YZ İçgörü & Aksiyon Önerileri</h6>
+      <span class="badge bg-primary-subtle text-primary border border-primary-subtle ms-1">AI</span>
+    </div>
+    <div class="row g-3" id="aksiyon-kartlar"></div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Duygu Dağılımı</div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="duyguChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Konu Dağılımı</div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="konuChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Aylık Trend</div>
+        <div class="card-body">
+          <div class="chart-container"><canvas id="trendChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Konum İstatistikleri (sadece işletme sahibi) -->
+  <div id="konum-section" style="display:none" class="mb-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold"><i class="bi bi-geo-alt-fill text-danger me-1"></i> Konum Bazlı Yorum Dağılımı</span>
+        <a href="/yorumlar/" class="btn btn-sm btn-outline-primary">Filtreyle Gör</a>
+      </div>
+      <div class="card-body p-0">
+        <div id="konum-loading" class="text-center py-3 text-muted">
+          <div class="spinner-border spinner-border-sm"></div> Yükleniyor...
+        </div>
+        <div id="konum-icerik" style="display:none">
+          <div id="konum-bos" class="text-center py-3 text-muted" style="display:none">
+            <i class="bi bi-geo-alt text-muted fs-4"></i>
+            <p class="mt-1 small">Henüz konum verisi yok. İşletmenizi kaydederken il/ilçe bilgisi ekleyin.</p>
+          </div>
+          <div class="table-responsive" id="konum-tablo-wrap">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th><i class="bi bi-map"></i> İl</th>
+                  <th>İlçe</th>
+                  <th class="text-end">Yorum Sayısı</th>
+                </tr>
+              </thead>
+              <tbody id="konum-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Son Yorumlar -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span class="fw-semibold">Son Yorumlar</span>
+      <a href="/yorumlar/" class="btn btn-sm btn-outline-primary">Tümünü Gör</a>
+    </div>
+    <div class="card-body p-0">
+      <div id="son-yorumlar-loading" class="text-center py-4 text-muted">
+        <div class="spinner-border spinner-border-sm"></div> Yükleniyor...
+      </div>
+      <div class="table-responsive" id="son-yorumlar-table" style="display:none">
+        <table class="table table-hover mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Müşteri</th>
+              <th>Yorum</th>
+              <th>Puan</th>
+              <th>Duygu</th>
+              <th>Tarih</th>
+            </tr>
+          </thead>
+          <tbody id="son-yorumlar-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/grafikler.js"></script>
+<script src="/betikler/altbilgi.js" defer></script>
+<script>
+requireAuth();
+updateSidebar();
+(function() {
+  const u = getUser();
+  const btn = document.getElementById('header-action-btn');
+  if (!btn || !u) return;
+  if (u.rol === 'user') {
+    btn.href = '/yorumlar/yukleme.html';
+    btn.innerHTML = '<i class="bi bi-upload"></i> Toplu Yükle';
+    btn.style.display = '';
+  }
+})();
+
+async function loadSonYorumlar() {
+  try {
+    const res = await apiFetch('/api/reviews?limit=5');
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    const tbody = document.getElementById('son-yorumlar-body');
+    document.getElementById('son-yorumlar-loading').style.display = 'none';
+    document.getElementById('son-yorumlar-table').style.display = '';
+
+    if (!data.yorumlar.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">Henüz yorum yok</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = data.yorumlar.map(r => `
+      <tr>
+        <td>${r.musteri_adi || '<span class="text-muted">Anonim</span>'}</td>
+        <td><span title="${r.yorum_metni}">${r.yorum_metni.substring(0,60)}${r.yorum_metni.length>60?'...':''}</span></td>
+        <td>${starsHtml(r.puan)}</td>
+        <td>${r.analiz ? duyguBadge(r.analiz.duygu) : '<span class="text-muted small">Analiz bekleniyor</span>'}</td>
+        <td>${formatDate(r.olusturma)}</td>
+      </tr>
+    `).join('');
+  } catch(e) {
+    document.getElementById('son-yorumlar-loading').innerHTML = '<p class="text-danger">Yüklenemedi</p>';
+  }
+}
+
+async function loadKonumIstatistik() {
+  const u = getUser();
+  if (!u || u.rol !== 'user') return;
+  document.getElementById('konum-section').style.display = '';
+  try {
+    const res = await apiFetch('/api/reviews/konum-istatistik');
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    document.getElementById('konum-loading').style.display = 'none';
+    document.getElementById('konum-icerik').style.display = '';
+    const tbody = document.getElementById('konum-body');
+    if (!data.length) {
+      document.getElementById('konum-bos').style.display = '';
+      document.getElementById('konum-tablo-wrap').style.display = 'none';
+      return;
+    }
+    tbody.innerHTML = data.map(il => {
+      const ilceSatir = il.ilceler.length
+        ? il.ilceler.map(i => `<span class="badge bg-light text-dark border me-1">${i.ilce} <strong>${i.sayi}</strong></span>`).join('')
+        : '<span class="text-muted small">-</span>';
+      return `<tr>
+        <td><i class="bi bi-geo-alt-fill text-danger"></i> <strong>${il.sehir}</strong></td>
+        <td>${ilceSatir}</td>
+        <td class="text-end"><span class="badge bg-primary">${il.toplam}</span></td>
+      </tr>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('konum-loading').innerHTML = '<p class="text-muted small text-center py-2">Konum verisi yüklenemedi</p>';
+  }
+}
+
+loadDashboardCharts();
+loadSonYorumlar();
+loadAksiyonKartlari();
+loadKonumIstatistik();
+</script>
+</body>
+</html>

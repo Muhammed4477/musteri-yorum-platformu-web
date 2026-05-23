@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Raporlar - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <a href="/panel/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/yorumlar/" class="nav-link"><i class="bi bi-chat-left-text"></i> Yorumlar</a>
+    <a href="/yorumlar/yukleme.html" class="nav-link"><i class="bi bi-upload"></i> Toplu Yükle</a>
+    <a href="/analiz/" class="nav-link"><i class="bi bi-graph-up"></i> Analiz</a>
+    <a href="/raporlar/" class="nav-link active"><i class="bi bi-file-earmark-bar-graph"></i> Raporlar</a>
+    <a href="/profil/" class="nav-link"><i class="bi bi-person-circle"></i> Profilim</a>
+    <a href="/yonetici/" class="nav-link" id="sidebar-admin-link" style="display:none"><i class="bi bi-shield-check"></i> Admin</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <h4 class="fw-bold mb-4">Raporlar</h4>
+
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4 text-center">
+          <i class="bi bi-file-pdf text-danger" style="font-size:4rem"></i>
+          <h5 class="fw-bold mt-3">PDF Rapor</h5>
+          <p class="text-muted">Tüm yorumlarınızın özet analizini PDF formatında indirin. Müşteri duygu dağılımı, konu analizleri ve son yorumları içerir.</p>
+          <ul class="list-unstyled text-start text-muted small mb-4">
+            <li><i class="bi bi-check-circle text-success me-2"></i>Özet istatistikler</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>Duygu dağılımı</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>Son 20 yorum detayı</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>İşletme bilgileri</li>
+          </ul>
+          <button class="btn btn-danger w-100" onclick="downloadReport('pdf')">
+            <i class="bi bi-download"></i> PDF İndir
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4 text-center">
+          <i class="bi bi-file-earmark-spreadsheet text-success" style="font-size:4rem"></i>
+          <h5 class="fw-bold mt-3">Excel Rapor</h5>
+          <p class="text-muted">Tüm yorumlarınızı ve analiz sonuçlarını Excel tablosu olarak indirin. Kendi analizleriniz için ham veri.</p>
+          <ul class="list-unstyled text-start text-muted small mb-4">
+            <li><i class="bi bi-check-circle text-success me-2"></i>Tüm yorum verileri</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>YZ analiz sonuçları</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>Kategori ve kaynak bilgisi</li>
+            <li><i class="bi bi-check-circle text-success me-2"></i>Filtre ve sıralama desteği</li>
+          </ul>
+          <button class="btn btn-success w-100" onclick="downloadReport('excel')">
+            <i class="bi bi-download"></i> Excel İndir
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="alert-container" class="mt-4"></div>
+
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-header bg-white fw-semibold">Rapor İpuçları</div>
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="d-flex gap-3">
+            <i class="bi bi-lightbulb text-warning fs-4"></i>
+            <div>
+              <h6 class="fw-semibold">Düzenli Raporlama</h6>
+              <p class="text-muted small mb-0">Aylık PDF raporlarınızı ekibinizle paylaşarak müşteri memnuniyetini takip edin.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex gap-3">
+            <i class="bi bi-graph-up text-primary fs-4"></i>
+            <div>
+              <h6 class="fw-semibold">Trend Analizi</h6>
+              <p class="text-muted small mb-0">Excel verisini kullanarak uzun vadeli trend grafikleri oluşturun.</p>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="d-flex gap-3">
+            <i class="bi bi-shield-check text-success fs-4"></i>
+            <div>
+              <h6 class="fw-semibold">Veri Güvenliği</h6>
+              <p class="text-muted small mb-0">Raporlarınız yalnızca sizin yorumlarınızı içerir ve güvenli biçimde oluşturulur.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script>
+requireAuth();
+updateSidebar();
+
+async function downloadReport(type) {
+  const token = getToken();
+  const url = type === 'pdf' ? '/api/reports/pdf' : '/api/reports/excel';
+  try {
+    const res = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+    if (!res.ok) { showAlert('Rapor oluşturulamadı', 'danger'); return; }
+    const blob = await res.blob();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = type === 'pdf' ? 'musteri-yorum-raporu.pdf' : 'musteri-yorumlar.xlsx';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    showAlert('Rapor başarıyla indirildi!', 'success');
+  } catch { showAlert('İndirme hatası'); }
+}
+</script>
+</body>
+</html>

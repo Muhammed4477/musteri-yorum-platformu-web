@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+  <style>
+    footer.site-footer { margin-left: var(--sidebar-width); transition: margin-left .3s ease; }
+    body.sidebar-collapsed footer.site-footer { margin-left: 78px; }
+    @media (max-width: 768px) { footer.site-footer { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <div class="px-4 pb-2">
+      <small class="text-white-50" style="font-size:.72rem;letter-spacing:.07em;text-transform:uppercase">Müşteri</small>
+      <div class="text-white fw-semibold small mt-1" id="sidebar-user"></div>
+    </div>
+    <a href="/musteri/anasayfa.html" class="nav-link"><i class="bi bi-shop"></i> İşletmeler</a>
+    <a href="/musteri/yorumlarim.html" class="nav-link"><i class="bi bi-chat-heart"></i> Yorumlarım</a>
+    <a href="/musteri/profil.html" class="nav-link active"><i class="bi bi-person-circle"></i> Profil</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <h4 class="fw-bold mb-4">Profilim</h4>
+  <div id="alert-container"></div>
+
+  <div class="row g-4">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">Bilgileri Güncelle</div>
+        <div class="card-body p-4">
+          <form id="profile-form">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Ad Soyad</label>
+                <input type="text" class="form-control" id="upd-adsoyad" required>
+              </div>
+              <div class="col-12">
+                <label class="form-label">E-posta</label>
+                <input type="email" class="form-control" id="upd-email" required>
+              </div>
+              <div class="col-12"><hr><h6 class="text-muted">Şifre Değiştir <small>(opsiyonel)</small></h6></div>
+              <div class="col-md-6">
+                <label class="form-label">Yeni Şifre</label>
+                <input type="password" class="form-control" id="upd-sifre" minlength="6" placeholder="Min. 6 karakter">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Yeni Şifre Tekrar</label>
+                <input type="password" class="form-control" id="upd-sifre2">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary px-4">
+                  <i class="bi bi-check-circle"></i> Kaydet
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Hesap Sil -->
+      <div class="card border-0 shadow-sm mt-3" style="border-top: 3px solid #ef4444 !important;">
+        <div class="card-header bg-white fw-semibold text-danger">
+          <i class="bi bi-exclamation-triangle-fill me-1"></i> Tehlikeli Bölge
+        </div>
+        <div class="card-body p-4">
+          <p class="text-muted small mb-3">Hesabınızı sildiğinizde tüm yorumlarınız ve kişisel verileriniz kalıcı olarak silinir. Bu işlem <strong>geri alınamaz</strong>.</p>
+          <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#hesapSilModal">
+            <i class="bi bi-trash3"></i> Hesabımı Sil
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hesap Sil Modal -->
+<div class="modal fade" id="hesapSilModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>Hesabı Sil</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p>Hesabınızı silmek istediğinizden emin misiniz? Bu işlem <strong>geri alınamaz</strong>.</p>
+        <div class="alert alert-danger small">
+          <i class="bi bi-info-circle me-1"></i> Tüm yorumlarınız ve kişisel verileriniz silinecektir.
+        </div>
+      </div>
+      <div class="modal-footer border-0">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Vazgeç</button>
+        <button class="btn btn-danger" id="hesap-sil-btn"><i class="bi bi-trash3"></i> Evet, Hesabımı Sil</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/altbilgi.js" defer></script>
+<script>
+requireAuth();
+const user = getUser();
+if (user && user.rol !== 'musteri') window.location.href = rolHomePage(user.rol);
+updateSidebar();
+
+async function loadProfile() {
+  const res = await apiFetch('/api/auth/me');
+  if (!res || !res.ok) return;
+  const u = await res.json();
+  document.getElementById('upd-adsoyad').value = u.ad_soyad;
+  document.getElementById('upd-email').value = u.email;
+}
+
+document.getElementById('profile-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const sifre = document.getElementById('upd-sifre').value;
+  const sifre2 = document.getElementById('upd-sifre2').value;
+  if (sifre && sifre !== sifre2) { showAlert('Şifreler eşleşmiyor'); return; }
+  const body = {
+    ad_soyad: document.getElementById('upd-adsoyad').value,
+    email: document.getElementById('upd-email').value
+  };
+  if (sifre) body.yeni_sifre = sifre;
+  const res = await apiFetch('/api/auth/me', { method: 'PUT', body: JSON.stringify(body) });
+  if (res && res.ok) {
+    showAlert('Profil güncellendi', 'success');
+    const u = getUser();
+    u.ad_soyad = body.ad_soyad;
+    localStorage.setItem('user', JSON.stringify(u));
+    loadProfile();
+  } else showAlert('Güncelleme başarısız');
+});
+
+document.getElementById('hesap-sil-btn').addEventListener('click', async () => {
+  const btn = document.getElementById('hesap-sil-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Siliniyor...';
+  const res = await apiFetch('/api/auth/me', { method: 'DELETE' });
+  if (res && res.ok) {
+    clearAuth();
+    window.location.href = '/giris.html';
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-trash3"></i> Evet, Hesabımı Sil';
+    showAlert('Hesap silinemedi, lütfen tekrar deneyin.');
+  }
+});
+
+loadProfile();
+</script>
+</body>
+</html>

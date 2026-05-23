@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analiz - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+  <style>
+    /* ---- Duygu kartları ---- */
+    .duygu-card {
+      cursor: pointer;
+      transition: transform .15s, box-shadow .15s;
+      border-top: 4px solid transparent !important;
+    }
+    .duygu-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.12) !important; }
+    .duygu-card.active { transform: translateY(-4px); box-shadow: 0 0 0 3px rgba(99,102,241,.45) !important; }
+    .duygu-card[data-duygu="olumlu"]  { border-top-color: #28a745 !important; }
+    .duygu-card[data-duygu="olumsuz"] { border-top-color: #dc3545 !important; }
+    .duygu-card[data-duygu="nötr"]    { border-top-color: #ffc107 !important; }
+
+    /* ---- Grafik tıklama ipucu ---- */
+    .chart-clickable { cursor: pointer; }
+    .chart-hint { font-size: .75rem; color: #94a3b8; margin-top: 4px; text-align:center; }
+
+    /* ---- Konu pilleri ---- */
+    .konu-pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 999px;
+      background: #f1f5f9; border: 1px solid #e2e8f0;
+      cursor: pointer; font-size: .85rem; font-weight: 600;
+      transition: all .15s; color: #334155;
+    }
+    .konu-pill:hover { background: #e0e7ff; border-color: #818cf8; color: #4338ca; }
+    .konu-pill.active { background: linear-gradient(135deg,#6366f1,#8b5cf6); border-color: transparent; color: #fff; }
+    .konu-pill .konu-sayi {
+      background: rgba(0,0,0,.12); border-radius: 999px;
+      padding: 1px 8px; font-size: .75rem;
+    }
+    .konu-pill.active .konu-sayi { background: rgba(255,255,255,.25); }
+
+    /* ---- Yorum kartı ---- */
+    .review-item {
+      border-radius: 10px; padding: 16px 18px; margin-bottom: 12px;
+      background: #fff; border-left: 4px solid #94a3b8;
+      box-shadow: 0 1px 4px rgba(15,23,42,.06);
+      transition: box-shadow .15s;
+    }
+    .review-item:hover { box-shadow: 0 4px 14px rgba(15,23,42,.10); }
+    .review-item.olumlu  { border-left-color: #28a745; background: #f4fbf6; }
+    .review-item.olumsuz { border-left-color: #dc3545; background: #fff5f5; }
+    .review-item.notr    { border-left-color: #ffc107; background: #fffbf0; }
+
+    /* ---- Öncelik badge ---- */
+    .badge-prio-high   { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-prio-mid    { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .badge-prio-low    { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+    /* ---- Aksiyon öneri satırı ---- */
+    .aksiyon-hint {
+      font-size: .8rem; color: #4f46e5; background: #eef2ff;
+      border-radius: 6px; padding: 5px 10px; display: inline-block; margin-top: 6px;
+    }
+    .aksiyon-hint.danger { color: #b91c1c; background: #fef2f2; }
+    .aksiyon-hint.warning { color: #92400e; background: #fffbeb; }
+    .aksiyon-hint.success { color: #166534; background: #f0fdf4; }
+
+    /* ---- Yanıt durumu ---- */
+    .yanit-badge-ok   { font-size:.75rem; color:#166534; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:999px; padding:2px 10px; }
+    .yanit-badge-wait { font-size:.75rem; color:#92400e; background:#fffbeb; border:1px solid #fde68a; border-radius:999px; padding:2px 10px; }
+
+    /* ---- Aktif filtre şeridi ---- */
+    #aktif-filtre-serit {
+      background: linear-gradient(90deg,#eef2ff,#f5f3ff);
+      border: 1px solid #c7d2fe; border-radius: 10px;
+      padding: 8px 16px; margin-bottom: 14px;
+      display: none; align-items: center; gap: 10px;
+    }
+    #aktif-filtre-serit.show { display: flex; }
+
+    /* ---- Liste bölümü ---- */
+    #liste-section { margin-top: 24px; }
+    #filtreli-liste { max-height: 680px; overflow-y: auto; }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <a href="/panel/" class="nav-link" data-label="Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+    <a href="/yorumlar/" class="nav-link" data-label="Yorumlar"><i class="bi bi-chat-left-text"></i> Yorumlar</a>
+    <a href="/yorumlar/yukleme.html" class="nav-link" data-label="Toplu Yükle"><i class="bi bi-upload"></i> Toplu Yükle</a>
+    <a href="/analiz/" class="nav-link active" data-label="Analiz"><i class="bi bi-graph-up"></i> Analiz</a>
+    <a href="/raporlar/" class="nav-link" data-label="Raporlar"><i class="bi bi-file-earmark-bar-graph"></i> Raporlar</a>
+    <a href="/profil/" class="nav-link" data-label="Profilim"><i class="bi bi-person-circle"></i> Profilim</a>
+    <a href="/yonetici/" class="nav-link" id="sidebar-admin-link" style="display:none" data-label="Admin"><i class="bi bi-shield-check"></i> Admin</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link" data-label="Geliştirici"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn" data-label="Çıkış"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <!-- Başlık + tarih filtresi -->
+  <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h4 class="fw-bold mb-0"><i class="bi bi-graph-up-arrow text-primary me-2"></i>YZ Analiz Sonuçları</h4>
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+      <input type="date" class="form-control form-control-sm" id="filter-baslangic" style="width:140px">
+      <input type="date" class="form-control form-control-sm" id="filter-bitis" style="width:140px">
+      <button class="btn btn-primary btn-sm" onclick="loadAnalysis()">
+        <i class="bi bi-arrow-clockwise"></i> Yenile
+      </button>
+    </div>
+  </div>
+
+  <!-- Duygu özet kartları (tıklanabilir) -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 duygu-card" data-duygu="olumlu">
+        <i class="bi bi-emoji-smile text-success" style="font-size:2.5rem"></i>
+        <h2 class="fw-bold text-success mt-2 mb-0" id="pct-olumlu">-</h2>
+        <div class="text-muted small mt-1">Olumlu Yorumlar <i class="bi bi-cursor-fill ms-1 opacity-50"></i></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 duygu-card" data-duygu="olumsuz">
+        <i class="bi bi-emoji-frown text-danger" style="font-size:2.5rem"></i>
+        <h2 class="fw-bold text-danger mt-2 mb-0" id="pct-olumsuz">-</h2>
+        <div class="text-muted small mt-1">Olumsuz Yorumlar <i class="bi bi-cursor-fill ms-1 opacity-50"></i></div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm text-center p-3 duygu-card" data-duygu="nötr">
+        <i class="bi bi-emoji-neutral text-warning" style="font-size:2.5rem"></i>
+        <h2 class="fw-bold text-warning mt-2 mb-0" id="pct-notr">-</h2>
+        <div class="text-muted small mt-1">Nötr Yorumlar <i class="bi bi-cursor-fill ms-1 opacity-50"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grafikler -->
+  <div class="row g-3 mb-3">
+    <div class="col-md-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">
+          <i class="bi bi-pie-chart-fill text-primary me-1"></i> Duygu Dağılımı
+        </div>
+        <div class="card-body pb-2">
+          <div class="chart-container chart-clickable"><canvas id="duyguChart"></canvas></div>
+          <p class="chart-hint"><i class="bi bi-hand-index"></i> Dilime tıklayarak yorumları filtreleyin</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-7">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white fw-semibold">
+          <i class="bi bi-bar-chart-fill text-primary me-1"></i> Konu Dağılımı
+        </div>
+        <div class="card-body pb-2">
+          <div class="chart-container chart-clickable"><canvas id="konuChart"></canvas></div>
+          <p class="chart-hint"><i class="bi bi-hand-index"></i> Konuya tıklayarak yorumları filtreleyin</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Konu pilleri (hızlı filtre) -->
+  <div class="card border-0 shadow-sm mb-0">
+    <div class="card-body py-3">
+      <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+        <span class="text-muted small fw-semibold"><i class="bi bi-tags me-1"></i>Konuya göre hızlı filtre:</span>
+        <div id="konu-pills" class="d-flex flex-wrap gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Aktif filtre şeridi -->
+  <div id="aktif-filtre-serit">
+    <i class="bi bi-funnel-fill text-primary"></i>
+    <span id="aktif-filtre-metin" class="fw-semibold small"></span>
+    <button class="btn btn-sm btn-outline-secondary ms-auto py-0 px-2" onclick="filtreTemizle()">
+      <i class="bi bi-x"></i> Temizle
+    </button>
+  </div>
+
+  <!-- Yorum listesi bölümü -->
+  <div id="liste-section" class="card border-0 shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center flex-wrap gap-2">
+      <span class="fw-semibold" id="liste-baslik">
+        <i class="bi bi-arrow-up text-muted"></i> Kart veya grafikten bir filtre seçin
+      </span>
+      <div class="d-flex align-items-center gap-2">
+        <span class="badge bg-secondary" id="liste-count">0</span>
+        <select class="form-select form-select-sm" id="sort-select" style="width:auto" onchange="sortReviews()">
+          <option value="tarih">En Yeni</option>
+          <option value="puan_desc">En Yüksek Puan</option>
+          <option value="puan_asc">En Düşük Puan</option>
+          <option value="oncelik">Öncelik (Yüksek→Düşük)</option>
+        </select>
+      </div>
+    </div>
+    <div class="card-body" id="filtreli-liste">
+      <div class="text-center text-muted py-5">
+        <i class="bi bi-bar-chart-steps opacity-25" style="font-size:3rem"></i>
+        <p class="mt-3 mb-0">Yukarıdaki <strong>duygu kartlarına</strong>, <strong>grafiklere</strong> veya <strong>konu pillerine</strong> tıklayarak yorumları filtreleyin.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/grafikler.js"></script>
+<script>
+requireAuth();
+updateSidebar();
+
+/* ============================================================
+   VERİ DURUMU
+   ============================================================ */
+let _duyguData = {};
+let _konuData  = {};
+let _aktifDuygu = null;
+let _aktifKonu  = null;
+let _listeItems = [];   // son yüklenen ham liste
+let _duyguChartInst = null;
+let _konuChartInst  = null;
+
+/* ============================================================
+   YARDIMCI: Öncelik hesapla
+   duygu + puan → { seviye: 'high'|'mid'|'low', etiket, ikon }
+   ============================================================ */
+function calcOncelik(duygu, puan) {
+  const p = puan ? Number(puan) : null;
+  if (duygu === 'olumsuz' && p !== null && p <= 2) {
+    return { seviye: 'high', etiket: '🔴 Yüksek Öncelik', cls: 'badge-prio-high' };
+  }
+  if (duygu === 'olumsuz') {
+    return { seviye: 'mid', etiket: '🟡 Orta Öncelik', cls: 'badge-prio-mid' };
+  }
+  if (duygu === 'nötr' || (p !== null && p === 3)) {
+    return { seviye: 'mid', etiket: '🟡 Orta Öncelik', cls: 'badge-prio-mid' };
+  }
+  return { seviye: 'low', etiket: '🟢 Düşük Öncelik', cls: 'badge-prio-low' };
+}
+
+/* ============================================================
+   YARDIMCI: Aksiyon önerisi
+   ============================================================ */
+function calcAksiyon(duygu, puan, konu) {
+  const p = puan ? Number(puan) : null;
+  const konuStr = konu ? `"${konu}" konusunda` : 'bu konuda';
+
+  if (duygu === 'olumsuz' && p !== null && p <= 2) {
+    return { metin: `⚡ Acil yanıt verin ve ${konuStr} çözüm sunun.`, cls: 'danger' };
+  }
+  if (duygu === 'olumsuz') {
+    return { metin: `💬 Müşteriyle iletişime geçin, ${konuStr} iyileştirme yapın.`, cls: 'warning' };
+  }
+  if (duygu === 'nötr') {
+    return { metin: `📌 Teşekkür mesajı gönderin; ${konuStr} gelişim fırsatı var.`, cls: 'warning' };
+  }
+  if (p !== null && p === 5) {
+    return { metin: `⭐ Memnun müşteriyi sosyal medyada yorum bırakmaya teşvik edin.`, cls: 'success' };
+  }
+  return { metin: `🎁 Sadakat programına davet edin; ${konuStr} güçlü yanınızı öne çıkarın.`, cls: 'success' };
+}
+
+/* ============================================================
+   ANALİZ ÖZET (summary) YÜKLEMESİ
+   ============================================================ */
+async function loadAnalysis() {
+  const b = document.getElementById('filter-baslangic').value;
+  const e = document.getElementById('filter-bitis').value;
+  const params = new URLSearchParams();
+  if (b) params.append('baslangic', b);
+  if (e) params.append('bitis', e);
+
+  try {
+    const res = await apiFetch('/api/analysis/summary?' + params);
+    if (!res || !res.ok) return;
+    const data = await res.json();
+    const { ozet } = data;
+    const toplam = ozet.toplam || 1;
+
+    document.getElementById('pct-olumlu').textContent  = `%${Math.round(ozet.olumlu/toplam*100)} (${ozet.olumlu})`;
+    document.getElementById('pct-olumsuz').textContent = `%${Math.round(ozet.olumsuz/toplam*100)} (${ozet.olumsuz})`;
+    document.getElementById('pct-notr').textContent    = `%${Math.round(ozet.notr/toplam*100)} (${ozet.notr})`;
+
+    _duyguData = data.duygu_dagilimi;
+    _konuData  = data.konu_dagilimi;
+
+    renderDuyguChartClickable(data.duygu_dagilimi);
+    renderKonuChartClickable(data.konu_dagilimi);
+    renderKonuPills(data.konu_dagilimi);
+
+    // Aktif filtre varsa yenile
+    if (_aktifDuygu) showByDuygu(_aktifDuygu, false);
+    else if (_aktifKonu) showByKonu(_aktifKonu, false);
+  } catch(err) { console.error(err); }
+}
+
+/* ============================================================
+   GRAFİK: Tıklanabilir Duygu Pasta
+   ============================================================ */
+function renderDuyguChartClickable(data) {
+  const ctx = document.getElementById('duyguChart').getContext('2d');
+  if (_duyguChartInst) _duyguChartInst.destroy();
+
+  const renkler = { olumlu: '#28a745', olumsuz: '#dc3545', 'nötr': '#ffc107' };
+  const labels  = Object.keys(data);
+  const values  = Object.values(data);
+  const colors  = labels.map(l => renkler[l] || '#6c757d');
+
+  _duyguChartInst = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors, hoverOffset: 10 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw} yorum` } }
+      },
+      onClick(evt, elements) {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        const duygu = labels[idx];
+        showByDuygu(duygu);
+      },
+      onHover(evt, elements) {
+        evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      }
+    }
+  });
+}
+
+/* ============================================================
+   GRAFİK: Tıklanabilir Konu Bar
+   ============================================================ */
+function renderKonuChartClickable(data) {
+  const ctx = document.getElementById('konuChart').getContext('2d');
+  if (_konuChartInst) _konuChartInst.destroy();
+
+  const labels = Object.keys(data);
+  const values = Object.values(data);
+
+  _konuChartInst = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Yorum Sayısı',
+        data: values,
+        backgroundColor: labels.map((_, i) => `hsla(${210 + i*28},70%,56%,.75)`),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false }, ticks: { stepSize: 1 } },
+        y: { grid: { display: false } }
+      },
+      onClick(evt, elements) {
+        if (!elements.length) return;
+        const idx = elements[0].index;
+        showByKonu(labels[idx]);
+      },
+      onHover(evt, elements) {
+        evt.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+      }
+    }
+  });
+}
+
+/* ============================================================
+   KONU PİLLERİ
+   ============================================================ */
+function renderKonuPills(data) {
+  const container = document.getElementById('konu-pills');
+  container.innerHTML = '';
+  if (!Object.keys(data).length) {
+    container.innerHTML = '<span class="text-muted small">Konu verisi yok</span>';
+    return;
+  }
+  Object.entries(data)
+    .sort((a,b) => b[1]-a[1])
+    .forEach(([konu, sayi]) => {
+      const btn = document.createElement('button');
+      btn.className = 'konu-pill';
+      btn.dataset.konu = konu;
+      btn.innerHTML = `<i class="bi bi-tag-fill opacity-50"></i>${konu}<span class="konu-sayi">${sayi}</span>`;
+      btn.addEventListener('click', () => showByKonu(konu));
+      container.appendChild(btn);
+    });
+}
+
+/* ============================================================
+   FİLTRE: Duyguya göre
+   ============================================================ */
+const DUYGU_META = {
+  'olumlu':  { icon: 'emoji-smile',   color: 'success', cls: 'olumlu',  baslik: 'Olumlu Yorumlar' },
+  'olumsuz': { icon: 'emoji-frown',   color: 'danger',  cls: 'olumsuz', baslik: 'Olumsuz Yorumlar' },
+  'nötr':    { icon: 'emoji-neutral', color: 'warning', cls: 'notr',    baslik: 'Nötr Yorumlar' }
+};
+
+async function showByDuygu(duygu, scroll = true) {
+  _aktifDuygu = duygu;
+  _aktifKonu  = null;
+
+  // Kart aktif işaret
+  document.querySelectorAll('.duygu-card').forEach(c =>
+    c.classList.toggle('active', c.dataset.duygu === duygu));
+  // Konu pilleri sıfırla
+  document.querySelectorAll('.konu-pill').forEach(p => p.classList.remove('active'));
+
+  const meta = DUYGU_META[duygu];
+  setListeBaslik(`<i class="bi bi-${meta.icon} text-${meta.color}"></i> ${meta.baslik}`, meta.color);
+  setAktifFiltre(`Duygu: ${duygu}`);
+  setListeLoading();
+
+  const res = await apiFetch('/api/analysis/reviews-by?duygu=' + encodeURIComponent(duygu));
+  const items = res && res.ok ? await res.json() : [];
+  _listeItems = items;
+  renderListe(items, meta.cls);
+  if (scroll) scrollToListe();
+}
+
+/* ============================================================
+   FİLTRE: Konuya göre
+   ============================================================ */
+async function showByKonu(konu, scroll = true) {
+  _aktifKonu  = konu;
+  _aktifDuygu = null;
+
+  document.querySelectorAll('.duygu-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.konu-pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.konu === konu));
+
+  setListeBaslik(`<i class="bi bi-tag-fill text-primary"></i> Konu: ${konu}`, 'primary');
+  setAktifFiltre(`Konu: ${konu}`);
+  setListeLoading();
+
+  const res = await apiFetch('/api/analysis/reviews-by?konu=' + encodeURIComponent(konu));
+  const items = res && res.ok ? await res.json() : [];
+  _listeItems = items;
+  renderListe(items, null);
+  if (scroll) scrollToListe();
+}
+
+/* ============================================================
+   FİLTRE TEMİZLE
+   ============================================================ */
+function filtreTemizle() {
+  _aktifDuygu = _aktifKonu = null;
+  _listeItems = [];
+  document.querySelectorAll('.duygu-card').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.konu-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('aktif-filtre-serit').classList.remove('show');
+  document.getElementById('liste-baslik').innerHTML = '<i class="bi bi-arrow-up text-muted"></i> Kart veya grafikten bir filtre seçin';
+  document.getElementById('liste-count').textContent = '0';
+  document.getElementById('liste-count').className = 'badge bg-secondary';
+  document.getElementById('filtreli-liste').innerHTML = `
+    <div class="text-center text-muted py-5">
+      <i class="bi bi-bar-chart-steps opacity-25" style="font-size:3rem"></i>
+      <p class="mt-3 mb-0">Yukarıdaki <strong>duygu kartlarına</strong>, <strong>grafiklere</strong> veya <strong>konu pillerine</strong> tıklayarak yorumları filtreleyin.</p>
+    </div>`;
+}
+
+/* ============================================================
+   SIRALA
+   ============================================================ */
+function sortReviews() {
+  if (!_listeItems.length) return;
+  const mode = document.getElementById('sort-select').value;
+  const sorted = [..._listeItems];
+  if (mode === 'puan_desc') sorted.sort((a,b) => (b.review?.puan||0) - (a.review?.puan||0));
+  else if (mode === 'puan_asc') sorted.sort((a,b) => (a.review?.puan||0) - (b.review?.puan||0));
+  else if (mode === 'oncelik') {
+    const prio = { high:0, mid:1, low:2 };
+    sorted.sort((a,b) => {
+      const pa = calcOncelik(a.duygu, a.review?.puan).seviye;
+      const pb = calcOncelik(b.duygu, b.review?.puan).seviye;
+      return prio[pa] - prio[pb];
+    });
+  }
+  // tarih: zaten DESC geldi
+  const cls = _aktifDuygu ? DUYGU_META[_aktifDuygu]?.cls : null;
+  renderListe(sorted, cls, false);
+}
+
+/* ============================================================
+   LİSTE RENDER
+   ============================================================ */
+function renderListe(items, duyguCls, resetSort = true) {
+  if (resetSort) document.getElementById('sort-select').value = 'tarih';
+  const countEl = document.getElementById('liste-count');
+  countEl.textContent = items.length;
+
+  const listEl = document.getElementById('filtreli-liste');
+  if (!items.length) {
+    listEl.innerHTML = '<p class="text-muted text-center py-4"><i class="bi bi-inbox fs-3 d-block mb-2"></i>Bu filtre için yorum bulunamadı.</p>';
+    return;
+  }
+
+  listEl.innerHTML = items.map(n => {
+    const review   = n.review || {};
+    const duygu    = n.duygu || '';
+    const konu     = n.konu_etiketi || '';
+    const puan     = review.puan;
+    const ozet     = n.ozet || '';
+    const yaniti   = review.isletme_yaniti;
+
+    const cls      = duyguCls || (duygu === 'olumlu' ? 'olumlu' : duygu === 'olumsuz' ? 'olumsuz' : 'notr');
+    const oncelik  = calcOncelik(duygu, puan);
+    const aksiyon  = calcAksiyon(duygu, puan, konu);
+
+    const duyguBadge = duygu === 'olumlu'
+      ? `<span class="badge badge-olumlu"><i class="bi bi-emoji-smile me-1"></i>olumlu</span>`
+      : duygu === 'olumsuz'
+        ? `<span class="badge badge-olumsuz"><i class="bi bi-emoji-frown me-1"></i>olumsuz</span>`
+        : `<span class="badge badge-notr"><i class="bi bi-emoji-neutral me-1"></i>nötr</span>`;
+
+    const yanitBadge = yaniti
+      ? `<span class="yanit-badge-ok"><i class="bi bi-check2-circle me-1"></i>Yanıtlandı</span>`
+      : `<span class="yanit-badge-wait"><i class="bi bi-clock me-1"></i>Yanıt Bekleniyor</span>`;
+
+    return `
+    <div class="review-item ${cls}">
+      <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-1">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <strong>${review.musteri_adi || 'Anonim'}</strong>
+          ${puan ? '<span>' + starsHtml(puan) + '</span>' : ''}
+        </div>
+        <small class="text-muted">${formatDate(review.olusturma || n.analiz_tarihi)}</small>
+      </div>
+
+      <p class="mb-2" style="line-height:1.55">${review.yorum_metni || ''}</p>
+
+      <!-- Meta satırı: duygu, konu, öncelik, yanıt durumu -->
+      <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+        ${duyguBadge}
+        ${konu ? `<span class="badge bg-light text-dark border"><i class="bi bi-tag me-1"></i>${konu}</span>` : ''}
+        <span class="badge ${oncelik.cls}">${oncelik.etiket}</span>
+        ${yanitBadge}
+      </div>
+
+      <!-- Aksiyon önerisi -->
+      <div class="aksiyon-hint ${aksiyon.cls}">
+        <i class="bi bi-lightbulb-fill me-1"></i> ${aksiyon.metin}
+      </div>
+
+      ${ozet ? `<div class="text-muted small fst-italic mt-2 ps-1">"${ozet}"</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+/* ============================================================
+   UI YARDIMCILAR
+   ============================================================ */
+function setListeBaslik(html, color) {
+  document.getElementById('liste-baslik').innerHTML = html;
+  const cnt = document.getElementById('liste-count');
+  cnt.className = `badge bg-${color}`;
+}
+
+function setAktifFiltre(metin) {
+  const serit = document.getElementById('aktif-filtre-serit');
+  document.getElementById('aktif-filtre-metin').textContent = metin;
+  serit.classList.add('show');
+}
+
+function setListeLoading() {
+  document.getElementById('filtreli-liste').innerHTML =
+    '<div class="text-center text-muted py-4"><div class="spinner-border spinner-border-sm"></div> Yorumlar yükleniyor...</div>';
+  document.getElementById('liste-count').textContent = '…';
+}
+
+function scrollToListe() {
+  document.getElementById('liste-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ============================================================
+   GRAFİK OVERRIDE: charts.js renderDuyguChart/renderKonuChart
+   Sayfamız kendi tıklanabilir versiyonlarını kullanıyor.
+   ============================================================ */
+window.renderDuyguChart = renderDuyguChartClickable;
+window.renderKonuChart  = renderKonuChartClickable;
+
+/* ============================================================
+   DUYGU KARTI TIKLAMA
+   ============================================================ */
+document.querySelectorAll('.duygu-card').forEach(card => {
+  card.addEventListener('click', () => showByDuygu(card.dataset.duygu));
+});
+
+/* ============================================================
+   BAŞLAT
+   ============================================================ */
+loadAnalysis();
+</script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>İşletme Detay - MüşteriYorum</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link href="/stiller/stil.css" rel="stylesheet">
+  <style>
+    .hero-business {
+      background:linear-gradient(135deg, #007bff, #6610f2);
+      color:#fff; padding:32px; border-radius:14px; margin-bottom:24px;
+    }
+    .review-row {
+      border-left: 4px solid #6c757d;
+      padding: 15px; background:#fff;
+      margin-bottom: 10px; border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(15,23,42,.05);
+    }
+    .review-row.olumlu  { border-left-color: #28a745; }
+    .review-row.olumsuz { border-left-color: #dc3545; }
+    .review-row.notr    { border-left-color: #ffc107; }
+    footer.site-footer { margin-left: var(--sidebar-width); transition: margin-left .3s ease; }
+    body.sidebar-collapsed footer.site-footer { margin-left: 78px; }
+    @media (max-width: 768px) { footer.site-footer { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-brand"><i class="bi bi-chat-square-text-fill text-primary"></i> MüşteriYorum</div>
+  <nav class="mt-3">
+    <div class="px-4 pb-2">
+      <small class="text-white-50" style="font-size:.72rem;letter-spacing:.07em;text-transform:uppercase">Müşteri</small>
+      <div class="text-white fw-semibold small mt-1" id="sidebar-user"></div>
+    </div>
+    <a href="/musteri/anasayfa.html" class="nav-link active"><i class="bi bi-shop"></i> İşletmeler</a>
+    <a href="/musteri/yorumlarim.html" class="nav-link"><i class="bi bi-chat-heart"></i> Yorumlarım</a>
+    <a href="/musteri/profil.html" class="nav-link"><i class="bi bi-person-circle"></i> Profil</a>
+    <hr style="border-color:rgba(255,255,255,0.1)">
+    <a href="/gelistirici/" class="nav-link"><i class="bi bi-code-slash"></i> Geliştirici</a>
+    <a href="#" class="nav-link logout-btn"><i class="bi bi-box-arrow-right"></i> Çıkış</a>
+  </nav>
+</div>
+
+<div class="main-content">
+  <a href="/musteri/anasayfa.html" class="btn btn-link text-decoration-none mb-3 px-0">
+    <i class="bi bi-arrow-left"></i> İşletmelere Dön
+  </a>
+  <div id="alert-container"></div>
+
+  <div id="loading" class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+
+  <div id="business-detail" style="display:none">
+    <!-- Hero -->
+    <div class="hero-business">
+      <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+        <div>
+          <h2 class="fw-bold mb-2" id="b-name"></h2>
+          <div class="d-flex gap-2 flex-wrap">
+            <span class="badge bg-white text-primary" id="b-kategori"></span>
+            <span class="badge bg-white text-primary" id="b-sehir"></span>
+          </div>
+          <p class="mt-3 mb-0 opacity-90" id="b-aciklama"></p>
+        </div>
+        <button class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#yorumModal">
+          <i class="bi bi-pencil-square"></i> Yorum Bırak
+        </button>
+      </div>
+    </div>
+
+    <!-- Özet -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="text-muted small">Toplam Yorum</div><h3 class="fw-bold text-primary mb-0" id="s-toplam">0</h3></div></div>
+      <div class="col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="text-muted small">Ortalama Puan</div><h3 class="fw-bold text-warning mb-0" id="s-puan">-</h3></div></div>
+      <div class="col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="text-muted small">Olumlu</div><h3 class="fw-bold text-success mb-0" id="s-olumlu">0</h3></div></div>
+      <div class="col-md-3"><div class="card border-0 shadow-sm text-center p-3"><div class="text-muted small">Olumsuz</div><h3 class="fw-bold text-danger mb-0" id="s-olumsuz">0</h3></div></div>
+    </div>
+
+    <!-- Yorumlar -->
+    <div class="card border-0 shadow-sm">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-chat-left-text"></i> Müşteri Yorumları</div>
+      <div class="card-body" id="yorumlar-listesi"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Yorum Modal -->
+<div class="modal fade" id="yorumModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Yorum Bırak</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="modal-alert"></div>
+        <div class="mb-3">
+          <label class="form-label">Puan</label>
+          <div id="modal-stars">
+            <i class="bi bi-star fs-3 text-warning star-btn" data-val="1" style="cursor:pointer"></i>
+            <i class="bi bi-star fs-3 text-warning star-btn" data-val="2" style="cursor:pointer"></i>
+            <i class="bi bi-star fs-3 text-warning star-btn" data-val="3" style="cursor:pointer"></i>
+            <i class="bi bi-star fs-3 text-warning star-btn" data-val="4" style="cursor:pointer"></i>
+            <i class="bi bi-star fs-3 text-warning star-btn" data-val="5" style="cursor:pointer"></i>
+          </div>
+          <input type="hidden" id="modal-puan">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Yorumunuz</label>
+          <textarea class="form-control" id="modal-yorum" rows="4" placeholder="Deneyiminizi paylaşın..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+        <button class="btn btn-primary" id="modal-gonder"><i class="bi bi-send"></i> Gönder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/betikler/ana.js"></script>
+<script src="/betikler/altbilgi.js" defer></script>
+<script>
+requireAuth();
+const user = getUser();
+if (user && user.rol !== 'musteri') window.location.href = rolHomePage(user.rol);
+updateSidebar();
+
+const params = new URLSearchParams(window.location.search);
+const businessId = params.get('id');
+let selectedPuan = 5;
+
+async function loadDetail() {
+  const res = await fetch('/api/businesses/' + businessId);
+  if (!res.ok) {
+    document.getElementById('loading').innerHTML = '<p class="text-danger">İşletme bulunamadı</p>';
+    return;
+  }
+  const data = await res.json();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('business-detail').style.display = '';
+
+  document.getElementById('b-name').textContent = data.isletme.isletme_adi;
+  document.getElementById('b-kategori').textContent = data.isletme.kategori || 'Genel';
+  document.getElementById('b-sehir').innerHTML = data.isletme.sehir ? `<i class="bi bi-geo-alt"></i> ${data.isletme.sehir}` : '';
+  document.getElementById('b-aciklama').textContent = data.isletme.aciklama || '';
+
+  document.getElementById('s-toplam').textContent = data.ozet.toplam;
+  document.getElementById('s-puan').textContent = data.ozet.ortalama || '-';
+  document.getElementById('s-olumlu').textContent = data.ozet.olumlu;
+  document.getElementById('s-olumsuz').textContent = data.ozet.olumsuz;
+
+  const liste = document.getElementById('yorumlar-listesi');
+  if (!data.yorumlar.length) {
+    liste.innerHTML = '<p class="text-muted text-center py-3">Henüz yorum yok. İlk yorumu sen bırak!</p>';
+    return;
+  }
+  liste.innerHTML = data.yorumlar.map(r => {
+    const cls = r.analiz ? (r.analiz.duygu === 'nötr' ? 'notr' : r.analiz.duygu) : '';
+    return `
+    <div class="review-row ${cls}">
+      <div class="d-flex justify-content-between mb-1">
+        <strong>${r.musteri_adi || (r.user ? r.user.ad_soyad : 'Anonim')}</strong>
+        <small class="text-muted">${formatDate(r.olusturma)}</small>
+      </div>
+      <div class="mb-1">${starsHtml(r.puan)}</div>
+      <p class="mb-2">${r.yorum_metni}</p>
+      ${r.analiz ? duyguBadge(r.analiz.duygu) : ''}
+      ${r.analiz && r.analiz.konu_etiketi ? `<span class="badge bg-light text-dark border">${r.analiz.konu_etiketi}</span>` : ''}
+      ${r.isletme_yaniti ? `
+        <div class="mt-2 p-2 rounded bg-light border-start border-3 border-primary">
+          <small class="fw-semibold text-primary"><i class="bi bi-building"></i> İşletme Yanıtı:</small>
+          <p class="mb-0 small mt-1">${r.isletme_yaniti}</p>
+        </div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// Yıldız seçimi
+document.querySelectorAll('.star-btn').forEach(s => {
+  s.addEventListener('click', () => {
+    selectedPuan = parseInt(s.dataset.val);
+    document.getElementById('modal-puan').value = selectedPuan;
+    document.querySelectorAll('.star-btn').forEach((x, i) => {
+      x.className = `bi bi-star${i < selectedPuan ? '-fill' : ''} fs-3 text-warning star-btn`;
+    });
+  });
+});
+document.querySelectorAll('.star-btn').forEach((x, i) => {
+  x.className = `bi bi-star${i < 5 ? '-fill' : ''} fs-3 text-warning star-btn`;
+});
+
+document.getElementById('modal-gonder').addEventListener('click', async () => {
+  const yorum_metni = document.getElementById('modal-yorum').value.trim();
+  if (!yorum_metni) {
+    document.getElementById('modal-alert').innerHTML = '<div class="alert alert-danger">Yorum metni zorunlu</div>';
+    return;
+  }
+  const res = await apiFetch('/api/musteri/yorum', {
+    method: 'POST',
+    body: JSON.stringify({ business_id: parseInt(businessId), yorum_metni, puan: selectedPuan })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    bootstrap.Modal.getInstance(document.getElementById('yorumModal')).hide();
+    document.getElementById('modal-yorum').value = '';
+    showAlert('Yorumunuz alındı, analiz başlatıldı!', 'success');
+    setTimeout(loadDetail, 800);
+  } else {
+    document.getElementById('modal-alert').innerHTML = `<div class="alert alert-danger">${data.hata || 'Hata'}</div>`;
+  }
+});
+
+loadDetail();
+</script>
+</body>
+</html>

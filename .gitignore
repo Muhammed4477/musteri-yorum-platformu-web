@@ -1,0 +1,32 @@
+# Bağımlılıklar
+node_modules/
+
+# Ortam değişkenleri (GİZLİ - asla commit etme)
+.env
+
+# Yüklenen dosyalar (klasör yapısı korunsun, içerik ignore edilsin)
+uploads/*
+!uploads/.gitkeep
+yuklemeler/
+
+# PDF / HTML build dosyaları
+PROJE_KAYNAK_DOKUMANI.pdf
+PROJE_KAYNAK_DOKUMANI.html
+md_to_pdf.py
+
+# Log dosyaları
+*.log
+npm-debug.log*
+
+# OS dosyaları
+.DS_Store
+Thumbs.db
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test verileri
+test.csv
